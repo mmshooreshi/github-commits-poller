@@ -18,15 +18,16 @@ import {
 import { requestLog } from '../lib/trackedFetch.js';
 import fs from 'fs';
 import path from 'path';
+import { escape } from 'querystring';
 
 const DEBUG = process.env.DEBUG === 'true';
 const USERS = process.env.GITHUB_USERS?.split(',') || [
-  'MatinGG','Reihaneh0-0','HoseinM89','Fuxgxugx135'
+  'MatinGG', 'Reihaneh0-0', 'HoseinM89', 'Fuxgxugx135'
 ];
-const GITHUB_TOKEN        = process.env.GITHUB_TOKEN;
-const TELEGRAM_TOKEN      = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_CHAT_ID    = process.env.TELEGRAM_CHAT_ID;
-const DAYS_BACK           = Number(process.env.DAYS_BACK || 3);
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+const DAYS_BACK = Number(process.env.DAYS_BACK || 3);
 const MAX_EVENTS_PER_USER = Number(process.env.MAX_EVENTS_PER_USER || 30);
 
 /**
@@ -52,6 +53,9 @@ function dumpDebugInfo(allCandidates, grandTotalSent) {
     error(`❌ Failed to write debug dump: ${e.message}`);
   }
 }
+
+
+
 
 /**
  * Summarizes request logs.
@@ -80,7 +84,7 @@ export default async function handler(req, res) {
 
   let grandTotalSent = 0;
   const allCandidates = [];
-  
+
   const iterationStart = new Date().toISOString().slice(0, 16);
   info(`Starting fetch for ${USERS} at ${iterationStart}`);
   try {
@@ -96,11 +100,11 @@ export default async function handler(req, res) {
   // Fetch events per user
   for (const user of USERS) {
 
-      try {
+    try {
       await sendTelegramMessage(
         TELEGRAM_TOKEN,
         TELEGRAM_CHAT_ID,
-        user
+        escapeMd(user)
       );
     } catch (msgErr) {
       error(`Failed to send start-fetch message for ${USERS}: ${msgErr.message}`);
@@ -113,15 +117,25 @@ export default async function handler(req, res) {
         user, GITHUB_TOKEN, MAX_EVENTS_PER_USER, lastSeenId
       );
 
-       try {
-      await sendTelegramMessage(
-        TELEGRAM_TOKEN,
-        TELEGRAM_CHAT_ID,
-        escapeMd(JSON.stringify(events))
-      );
-    } catch (msgErr) {
-      error(`Failed to send start-fetch message for ${USERS}: ${msgErr.message}`);
-    }
+      const simplifiedEvents = events.map(ev => {
+        const type = ev.type.replace(/Event$/, '');
+        const repo = ev.repo?.name || 'unknown-repo';
+        const actor = ev.actor?.login || 'unknown-user';
+
+        return {
+          id: ev.id,
+          message: `${actor} ${type} in ${repo}`
+        };
+      });
+      try {
+        await sendTelegramMessage(
+          TELEGRAM_TOKEN,
+          TELEGRAM_CHAT_ID,
+          escapeMd(simplifiedEvents.map(ev => `• ${ev.id}: ${ev.message}`).join('\n'))
+        );
+      } catch (msgErr) {
+        error(`Failed to send start-fetch message for ${USERS}: ${msgErr.message}`);
+      }
       // console.log(events)
 
       if (events.length === 0) {
@@ -163,7 +177,7 @@ export default async function handler(req, res) {
   allCandidates.sort((a, b) => new Date(a.time) - new Date(b.time));
   const allShas = allCandidates.map(c => c.sha);
   const fetchedMask = await batchHasFetched(allShas);
-  const sentMask    = await batchHasSent(allShas);
+  const sentMask = await batchHasSent(allShas);
 
   for (const candidate of allCandidates) {
     if (fetchedMask[candidate.sha]) continue;

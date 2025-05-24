@@ -58,6 +58,17 @@ export default async function handler(req, res) {
 
   // 2) fetch & collect from each user
   for (const user of USERS) {
+    const iterationStart = new Date().toISOString();
+    try {
+      await sendTelegramMessage(
+        TELEGRAM_TOKEN,
+        TELEGRAM_CHAT_ID,
+        `⏱️ [${iterationStart}] Starting GitHub fetch for ${user}`
+      );
+    } catch (msgErr) {
+      console.error(`❌ Failed to send start‐fetch message for ${user}:`, msgErr);
+    }
+
     try {
       const lastSeenId = await getLastEventId(user);
       const events = await fetchUserEvents(

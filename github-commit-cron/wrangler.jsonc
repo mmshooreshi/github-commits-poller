@@ -11,8 +11,7 @@
 		"enabled": true
 	},
   "triggers": {
-    // run at minute 0,15,30,45 of every hour
-    "crons": ["*/15 * * * *"]
+    "crons": ["* * * * *"]
   },
   "vars": {
     // your polling endpoint

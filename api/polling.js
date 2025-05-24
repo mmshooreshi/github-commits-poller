@@ -81,13 +81,13 @@ export default async function handler(req, res) {
   let grandTotalSent = 0;
   const allCandidates = [];
   
-  const iterationStart = new Date().toISOString();
+  const iterationStart = new Date().toISOString().slice(0, 16);
   info(`Starting fetch for ${USERS} at ${iterationStart}`);
   try {
     await sendTelegramMessage(
       TELEGRAM_TOKEN,
       TELEGRAM_CHAT_ID,
-      `⏱️ [${iterationStart}] Starting GitHub fetch for ${USERS}`
+      `⏱️ \`[${iterationStart}]\` Starting GitHub fetch for \`${USERS}\``
     );
   } catch (msgErr) {
     error(`Failed to send start-fetch message for ${USERS}: ${msgErr.message}`);

@@ -87,7 +87,7 @@ export default async function handler(req, res) {
     await sendTelegramMessage(
       TELEGRAM_TOKEN,
       TELEGRAM_CHAT_ID,
-      `⏱️ \`[${iterationStart}]\` Starting GitHub fetch for \`${USERS}\``
+      `⏱️ [${iterationStart}] Starting GitHub fetch for ${USERS}`
     );
   } catch (msgErr) {
     error(`Failed to send start-fetch message for ${USERS}: ${msgErr.message}`);

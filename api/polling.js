@@ -102,7 +102,7 @@ const iterationStart = new Date().toISOString().slice(0, 16);
       const events = await fetchUserEvents(
         user, GITHUB_TOKEN, MAX_EVENTS_PER_USER, lastSeenId
       );
-      console.log(events)
+      // console.log(events)
 
       if (events.length === 0) {
         debug(`No new events for ${user}`);

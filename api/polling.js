@@ -101,11 +101,11 @@ export default async function handler(req, res) {
   for (const user of USERS) {
 
     try {
-      await sendTelegramMessage(
-        TELEGRAM_TOKEN,
-        TELEGRAM_CHAT_ID,
-        escapeMd(user)
-      );
+      // await sendTelegramMessage(
+      //   TELEGRAM_TOKEN,
+      //   TELEGRAM_CHAT_ID,
+      //   escapeMd(user)
+      // );
     } catch (msgErr) {
       error(`Failed to send start-fetch message for ${USERS}: ${msgErr.message}`);
     }

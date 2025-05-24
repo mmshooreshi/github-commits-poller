@@ -81,7 +81,7 @@ export default async function handler(req, res) {
   let grandTotalSent = 0;
   const allCandidates = [];
   
-const iterationStart = new Date().toISOString().slice(0, 16);
+  const iterationStart = new Date().toISOString().slice(0, 16);
   info(`Starting fetch for ${USERS} at ${iterationStart}`);
   try {
     await sendTelegramMessage(
@@ -96,12 +96,32 @@ const iterationStart = new Date().toISOString().slice(0, 16);
   // Fetch events per user
   for (const user of USERS) {
 
+      try {
+      await sendTelegramMessage(
+        TELEGRAM_TOKEN,
+        TELEGRAM_CHAT_ID,
+        user
+      );
+    } catch (msgErr) {
+      error(`Failed to send start-fetch message for ${USERS}: ${msgErr.message}`);
+    }
+
     try {
       const lastSeenId = await getLastEventId(user);
       debug(`Last seen ID for ${user}: ${lastSeenId}`);
       const events = await fetchUserEvents(
         user, GITHUB_TOKEN, MAX_EVENTS_PER_USER, lastSeenId
       );
+
+       try {
+      await sendTelegramMessage(
+        TELEGRAM_TOKEN,
+        TELEGRAM_CHAT_ID,
+        escapeMd(JSON.stringify(events))
+      );
+    } catch (msgErr) {
+      error(`Failed to send start-fetch message for ${USERS}: ${msgErr.message}`);
+    }
       // console.log(events)
 
       if (events.length === 0) {

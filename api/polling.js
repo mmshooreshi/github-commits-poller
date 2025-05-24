@@ -5,7 +5,7 @@ dotenv.config();
 import { info, debug, error } from '../lib/logger.js';
 import { fetchUserEvents, fetchCommit } from '../lib/github.js';
 import { sendTelegramMessage } from '../lib/telegram.js';
-import { formatCommitMessage, logSection } from '../lib/utils.js';
+import { formatCommitMessage, logSection, escapeMd } from '../lib/utils.js';
 import {
   batchHasFetched,
   batchHasSent,
@@ -81,13 +81,13 @@ export default async function handler(req, res) {
   let grandTotalSent = 0;
   const allCandidates = [];
   
-  const iterationStart = new Date().toISOString().slice(0, 16);
+const iterationStart = new Date().toISOString().slice(0, 16);
   info(`Starting fetch for ${USERS} at ${iterationStart}`);
   try {
     await sendTelegramMessage(
       TELEGRAM_TOKEN,
       TELEGRAM_CHAT_ID,
-      `⏱️ [${iterationStart}] Starting GitHub fetch for ${USERS}`
+      escapeMd(`⏱️ [${iterationStart}] Starting GitHub fetch for ${USERS}`)
     );
   } catch (msgErr) {
     error(`Failed to send start-fetch message for ${USERS}: ${msgErr.message}`);
@@ -102,6 +102,7 @@ export default async function handler(req, res) {
       const events = await fetchUserEvents(
         user, GITHUB_TOKEN, MAX_EVENTS_PER_USER, lastSeenId
       );
+      console.log(events)
 
       if (events.length === 0) {
         debug(`No new events for ${user}`);

@@ -128,11 +128,11 @@ export default async function handler(req, res) {
         };
       });
       try {
-        await sendTelegramMessage(
-          TELEGRAM_TOKEN,
-          TELEGRAM_CHAT_ID,
-          escapeMd(simplifiedEvents.map(ev => `• ${ev.id}: ${ev.message}`).join('\n'))
-        );
+        // await sendTelegramMessage(
+        //   TELEGRAM_TOKEN,
+        //   TELEGRAM_CHAT_ID,
+        //   escapeMd(simplifiedEvents.map(ev => `• ${ev.id}: ${ev.message}`).join('\n'))
+        // );
       } catch (msgErr) {
         error(`Failed to send start-fetch message for ${USERS}: ${msgErr.message}`);
       }

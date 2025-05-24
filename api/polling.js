@@ -80,7 +80,9 @@ export default async function handler(req, res) {
 
   let grandTotalSent = 0;
   const allCandidates = [];
-
+  
+  const iterationStart = new Date().toISOString();
+  info(`Starting fetch for ${USERS} at ${iterationStart}`);
   try {
     await sendTelegramMessage(
       TELEGRAM_TOKEN,
@@ -93,8 +95,6 @@ export default async function handler(req, res) {
 
   // Fetch events per user
   for (const user of USERS) {
-    const iterationStart = new Date().toISOString();
-    info(`Starting fetch for ${user} at ${iterationStart}`);
 
     try {
       const lastSeenId = await getLastEventId(user);
